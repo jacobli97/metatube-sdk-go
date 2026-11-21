@@ -1,0 +1,22 @@
+version: "3.8"
+
+services:
+  metatube:
+    # 使用你 fork 仓库构建的镜像，包含 HEYZO provider 修复
+    image: metatube-server:dev-fix
+    container_name: metatube-dev
+    ports:
+      - "9090:8080"
+    volumes:
+      - metatube-data:/data
+    environment:
+      - TOKEN=
+      - DSN=file:/data/metatube.db
+      - DB_AUTO_MIGRATE=1
+      # 如果服务器 IP 被 Cloudflare 限制，取消下面两行注释配置代理
+      # - HTTP_PROXY=http://your-proxy:port
+      # - HTTPS_PROXY=http://your-proxy:port
+    restart: unless-stopped
+
+volumes:
+  metatube-data:
