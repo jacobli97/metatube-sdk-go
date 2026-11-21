@@ -40,7 +40,19 @@ type Heyzo struct {
 }
 
 func New() *Heyzo {
-	return &Heyzo{scraper.NewDefaultScraper(Name, baseURL, Priority, language.Japanese)}
+	return &Heyzo{scraper.NewDefaultScraper(
+		Name, baseURL, Priority,
+		language.Japanese,
+		// heyzo.com is protected by Cloudflare bot management which returns
+		// 404 for requests lacking a browser-like `Accept` header.
+		// Go's net/http does not send `Accept` by default, and colly falls
+		// back to `Accept: */*`, which Cloudflare rejects.
+		scraper.WithHeaders(map[string]string{
+			"Accept":          "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+			"Accept-Language": "ja-JP,ja;q=0.9,en;q=0.8",
+			"Referer":         "https://www.heyzo.com/",
+		}),
+	)}
 }
 
 func (hzo *Heyzo) GetMovieReviewsByID(id string) (reviews []*model.MovieReviewDetail, err error) {
